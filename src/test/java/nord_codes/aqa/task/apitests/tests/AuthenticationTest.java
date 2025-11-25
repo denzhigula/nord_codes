@@ -1,13 +1,18 @@
 package nord_codes.aqa.task.apitests.tests;
 
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import nord_codes.aqa.task.apitests.models.ApiResponse;
 import nord_codes.aqa.task.apitests.utils.TestData;
-import io.qameta.allure.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static nord_codes.aqa.task.apitests.utils.TestData.*;
+import static org.assertj.core.api.Assertions.*;
 
 @Epic("API Authentication")
 @Feature("X-Api-Key Validation")
@@ -29,7 +34,7 @@ public class AuthenticationTest extends BaseTest {
 
         assertThat(response.getStatusCode())
                 .as("Запрос без API ключа должен возвращать статус 401 или 403")
-                .isIn(401, 403);
+                .isIn(STATUS_UNAUTHORIZED, STATUS_FORBIDDEN);
     }
 
     @Test
@@ -48,7 +53,7 @@ public class AuthenticationTest extends BaseTest {
 
         assertThat(response.getStatusCode())
                 .as("Запрос с неверным API ключом должен возвращать статус 401 или 403")
-                .isIn(401, 403);
+                .isIn(STATUS_UNAUTHORIZED, STATUS_FORBIDDEN);
     }
 
     @Test
@@ -67,7 +72,7 @@ public class AuthenticationTest extends BaseTest {
 
         assertThat(response.getStatusCode())
                 .as("Запрос с пустым API ключом должен возвращать статус 401 или 403")
-                .isIn(401, 403);
+                .isIn(STATUS_UNAUTHORIZED, STATUS_FORBIDDEN);
     }
 
     @Test
@@ -85,6 +90,25 @@ public class AuthenticationTest extends BaseTest {
 
         assertThat(response.getStatusCode())
                 .as("Запрос с валидным API ключом должен возвращать статус 200")
-                .isEqualTo(200);
+                .isEqualTo(STATUS_OK);
     }
+
+    @Test
+    @DisplayName("TC_35: Запрос с правильным X-Api-Key и паттерном из документации должен возвращать статус 200")
+    @Story("Проверка аутентификации")
+    @Severity(SeverityLevel.BLOCKER)
+    void requestWithValidApiKeyAndPatternShouldReturn200() {
+        String token = tokenGenerator.generateValidToken(false);
+
+        ApiResponse response = apiClient.sendRequest(token, TestData.VALID_ACTION_LOGIN);
+
+        assertThat(response.getResult())
+                .as("Запрос с валидным API ключом должен возвращать ответ")
+                .isNotNull();
+
+        assertThat(response.getStatusCode())
+                .as("Запрос с валидным API ключом должен возвращать статус 200")
+                .isEqualTo(STATUS_OK);
+    }
+
 }

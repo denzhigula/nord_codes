@@ -14,16 +14,11 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.*;
 
 public class WireMockExtension implements BeforeEachCallback, AfterEachCallback {
-
     private WireMockServer wireMockServer;
     private final int port;
 
     public WireMockExtension(int port) {
         this.port = port;
-    }
-
-    public WireMockExtension() {
-        this(8888);
     }
 
     @Override

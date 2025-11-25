@@ -9,7 +9,8 @@ public class ApiResponse {
     private String message;
     private Integer statusCode;
 
-    public ApiResponse() {}
+    public ApiResponse() {
+    }
 
     public ApiResponse(String result, String message) {
         this.result = result;

@@ -1,14 +1,20 @@
 package nord_codes.aqa.task.apitests.tests;
 
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import nord_codes.aqa.task.apitests.models.ApiResponse;
 import nord_codes.aqa.task.apitests.utils.TestData;
-import io.qameta.allure.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.assertj.core.api.Assertions.assertThat;
+import static nord_codes.aqa.task.apitests.config.TestConfig.*;
+import static nord_codes.aqa.task.apitests.utils.TestData.*;
+import static org.assertj.core.api.Assertions.*;
 
 @Epic("WireMock Integration")
 @Feature("External Services Mocking")
@@ -21,17 +27,12 @@ public class WireMockTest extends BaseTest {
     @Severity(SeverityLevel.CRITICAL)
     void loginWithSuccessfulExternalAuth() {
         String token = tokenGenerator.generateValidToken();
-
-        // Настраиваем успешный ответ от внешнего сервиса
-        setupExternalServiceSuccess("/auth");
-
+        setupExternalServiceSuccess(AUTH_ENDPOINT);
         ApiResponse response = apiClient.sendRequest(token, TestData.VALID_ACTION_LOGIN);
-
         assertThat(response.getStatusCode())
                 .as("LOGIN при успешном внешнем сервисе должен возвращать 200")
                 .isEqualTo(200);
-
-        verifyExternalServiceCalled("/auth", token);
+        verifyExternalServiceCalled(AUTH_ENDPOINT, token);
     }
 
     @Test
@@ -40,17 +41,13 @@ public class WireMockTest extends BaseTest {
     @Severity(SeverityLevel.CRITICAL)
     void loginWithFailedExternalAuth() {
         String token = tokenGenerator.generateValidToken();
-
-        // Настраиваем ошибку от внешнего сервиса
-        setupExternalServiceFailure("/auth", 401);
-
+        setupExternalServiceFailure(AUTH_ENDPOINT, STATUS_UNAUTHORIZED);
         ApiResponse response = apiClient.sendRequest(token, TestData.VALID_ACTION_LOGIN);
-
         assertThat(response.getResult())
                 .as("LOGIN при ошибке внешнего сервиса должен возвращать ERROR")
                 .isEqualTo(TestData.RESULT_ERROR);
 
-        verifyExternalServiceCalled("/auth", token);
+        verifyExternalServiceCalled(AUTH_ENDPOINT, token);
     }
 
     @Test
@@ -61,20 +58,20 @@ public class WireMockTest extends BaseTest {
         String token = tokenGenerator.generateValidToken();
 
         // Сначала LOGIN
-        setupExternalServiceSuccess("/auth");
+        setupExternalServiceSuccess(AUTH_ENDPOINT);
         ApiResponse loginResponse = apiClient.sendRequest(token, TestData.VALID_ACTION_LOGIN);
         assertThat(loginResponse.getStatusCode()).isEqualTo(200);
 
         // Затем ACTION с успешным внешним сервисом
-        setupExternalServiceSuccess("/doAction");
+        setupExternalServiceSuccess(DO_ACTION_ENDPOINT);
         ApiResponse actionResponse = apiClient.sendRequest(token, TestData.VALID_ACTION_ACTION);
 
         assertThat(actionResponse.getStatusCode())
                 .as("ACTION при успешном внешнем сервисе должен возвращать 200")
                 .isEqualTo(200);
 
-        verifyExternalServiceCalled("/auth", token);
-        verifyExternalServiceCalled("/doAction", token);
+        verifyExternalServiceCalled(AUTH_ENDPOINT, token);
+        verifyExternalServiceCalled(DO_ACTION_ENDPOINT, token);
     }
 
     @Test
@@ -85,20 +82,20 @@ public class WireMockTest extends BaseTest {
         String token = tokenGenerator.generateValidToken();
 
         // Сначала LOGIN
-        setupExternalServiceSuccess("/auth");
+        setupExternalServiceSuccess(AUTH_ENDPOINT);
         ApiResponse loginResponse = apiClient.sendRequest(token, TestData.VALID_ACTION_LOGIN);
         assertThat(loginResponse.getStatusCode()).isEqualTo(200);
 
         // Затем ACTION с ошибкой внешнего сервиса
-        setupExternalServiceFailure("/doAction", 500);
+        setupExternalServiceFailure(DO_ACTION_ENDPOINT, STATUS_INTERNAL_ERROR);
         ApiResponse actionResponse = apiClient.sendRequest(token, TestData.VALID_ACTION_ACTION);
 
         assertThat(actionResponse.getResult())
                 .as("ACTION при ошибке внешнего сервиса должен возвращать ERROR")
                 .isEqualTo(TestData.RESULT_ERROR);
 
-        verifyExternalServiceCalled("/auth", token);
-        verifyExternalServiceCalled("/doAction", token);
+        verifyExternalServiceCalled(AUTH_ENDPOINT, token);
+        verifyExternalServiceCalled(DO_ACTION_ENDPOINT, token);
     }
 
     @Test
@@ -108,8 +105,8 @@ public class WireMockTest extends BaseTest {
     void verifyExternalServiceParameters() {
         String token = tokenGenerator.generateValidToken();
 
-        setupExternalServiceSuccess("/auth");
-        setupExternalServiceSuccess("/doAction");
+        setupExternalServiceSuccess(AUTH_ENDPOINT);
+        setupExternalServiceSuccess(DO_ACTION_ENDPOINT);
 
         // Выполняем последовательность действий
         apiClient.sendRequest(token, TestData.VALID_ACTION_LOGIN);
@@ -117,15 +114,15 @@ public class WireMockTest extends BaseTest {
         apiClient.sendRequest(token, TestData.VALID_ACTION_LOGOUT);
 
         // Проверяем что внешние сервисы вызывались с правильным токеном
-        verify(postRequestedFor(urlEqualTo("/auth"))
+        verify(postRequestedFor(urlEqualTo(AUTH_ENDPOINT))
                 .withRequestBody(containing("token=" + token)));
 
-        verify(postRequestedFor(urlEqualTo("/doAction"))
+        verify(postRequestedFor(urlEqualTo(DO_ACTION_ENDPOINT))
                 .withRequestBody(containing("token=" + token)));
 
         // Проверяем количество вызовов
-        verifyExternalServiceCalledTimes("/auth", 1);
-        verifyExternalServiceCalledTimes("/doAction", 1);
+        verifyExternalServiceCalledTimes(AUTH_ENDPOINT, 1);
+        verifyExternalServiceCalledTimes(DO_ACTION_ENDPOINT, 1);
     }
 
     @Test
@@ -145,8 +142,8 @@ public class WireMockTest extends BaseTest {
         apiClient.sendRequest(tokenGenerator.generateValidToken(), "INVALID_ACTION");
 
         // Проверяем что внешние сервисы не вызывались
-        verifyExternalServiceNotCalled("/auth");
-        verifyExternalServiceNotCalled("/doAction");
+        verifyExternalServiceNotCalled(AUTH_ENDPOINT);
+        verifyExternalServiceNotCalled(DO_ACTION_ENDPOINT);
     }
 
     @Test
@@ -157,13 +154,13 @@ public class WireMockTest extends BaseTest {
         String token = tokenGenerator.generateValidToken();
 
         // Настраиваем таймаут для внешнего сервиса
-        setupExternalServiceTimeout("/auth");
+        setupExternalServiceTimeout(AUTH_ENDPOINT);
 
         ApiResponse response = apiClient.sendRequest(token, TestData.VALID_ACTION_LOGIN);
 
         // Приложение должно обработать таймаут
         assertThat(response.getResult()).isNotNull();
-        verifyExternalServiceCalled("/auth", token);
+        verifyExternalServiceCalled(AUTH_ENDPOINT, token);
     }
 
     @Test

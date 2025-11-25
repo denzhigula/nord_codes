@@ -1,15 +1,21 @@
 package nord_codes.aqa.task.apitests.tests;
 
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import nord_codes.aqa.task.apitests.models.ApiResponse;
 import nord_codes.aqa.task.apitests.utils.TestData;
-import io.qameta.allure.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static nord_codes.aqa.task.apitests.config.TestConfig.*;
+import static nord_codes.aqa.task.apitests.utils.TestData.*;
+import static org.assertj.core.api.Assertions.*;
 
 @Epic("API Validation")
 @Feature("Validation of Input Parameters")
@@ -32,7 +38,7 @@ public class ValidationTest extends BaseTest {
 
         assertThat(response.getStatusCode())
                 .as("Невалидный токен должен возвращать статус 400")
-                .isEqualTo(400);
+                .isEqualTo(STATUS_BAD_REQUEST);
     }
 
     @Test
@@ -50,7 +56,7 @@ public class ValidationTest extends BaseTest {
 
         assertThat(response.getStatusCode())
                 .as("Токен с недопустимыми символами должен возвращать статус 400")
-                .isEqualTo(400);
+                .isEqualTo(STATUS_BAD_REQUEST);
     }
 
     @Test
@@ -58,7 +64,7 @@ public class ValidationTest extends BaseTest {
     @Story("Валидация токена")
     @Severity(SeverityLevel.CRITICAL)
     void requestWithoutTokenShouldReturnError() {
-        ApiResponse response = apiClient.sendRequest("", TestData.VALID_ACTION_LOGIN);
+        ApiResponse response = apiClient.sendRequest(EMPTY_STRING, TestData.VALID_ACTION_LOGIN);
 
         assertThat(response.getResult())
                 .as("Запрос без токена должен возвращать ERROR")
@@ -66,7 +72,7 @@ public class ValidationTest extends BaseTest {
 
         assertThat(response.getStatusCode())
                 .as("Запрос без токена должен возвращать статус 400")
-                .isEqualTo(400);
+                .isEqualTo(STATUS_BAD_REQUEST);
     }
 
     @Test
@@ -82,7 +88,7 @@ public class ValidationTest extends BaseTest {
 
         assertThat(response.getStatusCode())
                 .as("Запрос с null токеном должен возвращать статус 400")
-                .isEqualTo(400);
+                .isEqualTo(STATUS_BAD_REQUEST);
     }
 
     @Test
@@ -100,7 +106,7 @@ public class ValidationTest extends BaseTest {
 
         assertThat(response.getStatusCode())
                 .as("Невалидный action должен возвращать статус 400")
-                .isEqualTo(400);
+                .isEqualTo(STATUS_BAD_REQUEST);
     }
 
     @Test
@@ -110,7 +116,7 @@ public class ValidationTest extends BaseTest {
     void requestWithoutActionShouldReturnError() {
         String token = tokenGenerator.generateValidToken();
 
-        ApiResponse response = apiClient.sendRequest(token, "");
+        ApiResponse response = apiClient.sendRequest(token, EMPTY_STRING);
 
         assertThat(response.getResult())
                 .as("Запрос без action должен возвращать ERROR")
@@ -118,7 +124,7 @@ public class ValidationTest extends BaseTest {
 
         assertThat(response.getStatusCode())
                 .as("Запрос без action должен возвращать статус 400")
-                .isEqualTo(400);
+                .isEqualTo(STATUS_BAD_REQUEST);
     }
 
     @Test
@@ -136,11 +142,11 @@ public class ValidationTest extends BaseTest {
 
         assertThat(response.getStatusCode())
                 .as("Запрос с null action должен возвращать статус 400")
-                .isEqualTo(400);
+                .isEqualTo(STATUS_BAD_REQUEST);
     }
 
     @Test
-    @DisplayName("TC_12: Запрос с валидным токеном 32 символа должен возвращать статус 200")
+    @DisplayName("TC_12: Запрос с валидным токеном " + TOKEN_LENGTH + " символа должен возвращать статус 200")
     @Story("Валидация токена")
     @Severity(SeverityLevel.BLOCKER)
     void requestWithValid32CharTokenShouldReturn200() {
@@ -154,10 +160,10 @@ public class ValidationTest extends BaseTest {
 
         assertThat(response.getStatusCode())
                 .as("Валидный запрос должен возвращать статус 200")
-                .isEqualTo(200);
+                .isEqualTo(STATUS_OK);
 
         assertThat(validToken)
-                .as("Токен должен быть длиной 32 символа")
-                .hasSize(32);
+                .as("Токен должен быть длиной " + TOKEN_LENGTH + " символа")
+                .hasSize(TOKEN_LENGTH);
     }
 }

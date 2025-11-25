@@ -10,13 +10,14 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static nord_codes.aqa.task.apitests.config.TestConfig.*;
 
 
 @TestMethodOrder(TestOrder.class)
 public class BaseTest {
 
     @RegisterExtension
-    static WireMockExtension wireMockExtension = new WireMockExtension(8888);
+    static WireMockExtension wireMockExtension = new WireMockExtension(MOCK_PORT);
 
     protected final ApiClient apiClient = new ApiClient();
     protected final TokenGenerator tokenGenerator = new TokenGenerator();
@@ -38,7 +39,7 @@ public class BaseTest {
 
     protected void setupDefaultStubs() {
         stubFor(
-                post(urlEqualTo("/auth"))
+                post(urlEqualTo(AUTH_ENDPOINT))
                         .willReturn(aResponse()
                                 .withStatus(200)
                                 .withHeader("Content-Type", "text/plain")
@@ -46,7 +47,7 @@ public class BaseTest {
         );
 
         stubFor(
-                post(urlEqualTo("/doAction"))
+                post(urlEqualTo(DO_ACTION_ENDPOINT))
                         .willReturn(aResponse()
                                 .withStatus(200)
                                 .withHeader("Content-Type", "text/plain")
@@ -91,7 +92,7 @@ public class BaseTest {
         stubFor(post(urlEqualTo(endpoint))
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withFixedDelay(5000) // 5 seconds delay
+                        .withFixedDelay(5000)
                         .withHeader("Content-Type", "application/json")
                         .withBody("{\"status\":\"OK\"}")));
     }

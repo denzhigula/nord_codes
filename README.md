@@ -17,8 +17,11 @@
 # Запуск всех тестов
 mvn test
 
-# Запуск с генерацией Allure отчета
-mvn test allure:serve
+# Запуск Allure отчета
+mvn allure:serve
 
 # Запуск конкретного тестового класса
 mvn test -Dtest=AuthenticationTest
+
+#  Известные баги:
+ - паттерн из документации (ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789) не работает

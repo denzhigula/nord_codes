@@ -1,14 +1,18 @@
 package nord_codes.aqa.task.apitests.tests;
 
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
+import io.restassured.response.Response;
 import nord_codes.aqa.task.apitests.models.ApiResponse;
 import nord_codes.aqa.task.apitests.utils.TestData;
-import io.qameta.allure.*;
-import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 @Epic("API Integration Tests")
 @Feature("End-to-End Scenarios")
