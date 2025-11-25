@@ -24,4 +24,5 @@ mvn allure:serve
 mvn test -Dtest=AuthenticationTest
 
 #  Известные баги:
- - паттерн из документации (ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789) не работает
+ - паттерн из документации [ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789] не работает
+   как workaround нужно использовать [ABCDEF0123456789]
